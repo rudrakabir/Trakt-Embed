@@ -1,13 +1,14 @@
+
 <!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Last Watched Show</title>
+    <title>Last Watched on Trakt</title>
     <style>
         .trakt-embed {
             font-family: Arial, sans-serif;
-            max-width: 300px;
+            max-width: 500px;
             border: 1px solid #ddd;
             padding: 15px;
             border-radius: 8px;
@@ -16,6 +17,25 @@
         .trakt-embed h3 {
             margin-top: 0;
             color: #2c3e50;
+        }
+        .trakt-embed .item {
+            margin-bottom: 15px;
+            padding-bottom: 15px;
+            border-bottom: 1px solid #eee;
+            display: flex;
+            align-items: start;
+        }
+        .trakt-embed .item:last-child {
+            margin-bottom: 0;
+            padding-bottom: 0;
+            border-bottom: none;
+        }
+        .trakt-embed .item-image {
+            width: 100px;
+            margin-right: 15px;
+        }
+        .trakt-embed .item-details {
+            flex-grow: 1;
         }
         .trakt-embed p {
             margin: 5px 0;
@@ -29,10 +49,25 @@
 </head>
 <body>
     <div class="trakt-embed">
-        <h3>Last Watched Show</h3>
-        <p><strong>Show:</strong> <span id="show-title">Kim's Convenience</span></p>
-        <p><strong>Episode:</strong> <span id="episode-title">Bon Voyage (S04E13)</span></p>
-        <p class="timestamp"><span id="watched-at">2024-09-11T21:04:07.000Z</span></p>
+        <h3>Last Watched on Trakt</h3>
+
+        <div class="item">
+            <img class="item-image" src="https://image.tmdb.org/t/p/w200/maBJkaBM4UqAttn9UkLCfZEVEfk.jpg" alt="Superstore">
+            <div class="item-details">
+                <p><strong>TV Show:</strong> Superstore</p>
+                <p><strong>Episode:</strong> Seasonal Help (S02E09)</p>
+                <p class="timestamp">Watched: 2024-09-15 00:31:38 UTC</p>
+            </div>
+        </div>
+    
+        <div class="item">
+            <img class="item-image" src="https://image.tmdb.org/t/p/w200/23oJaeBh0FDk2mQ2P240PU9Xxfh.jpg" alt="Jujutsu Kaisen 0">
+            <div class="item-details">
+                <p><strong>Movie:</strong> Jujutsu Kaisen 0 (2021)</p>
+                <p class="timestamp">Watched: 2024-09-14 20:33:11 UTC</p>
+            </div>
+        </div>
+    
     </div>
 </body>
 </html>
