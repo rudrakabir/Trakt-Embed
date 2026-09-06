@@ -1,40 +1,33 @@
-import requests
+"""Print the latest episode using the same validated client as the widget."""
 import os
+import sys
 from dotenv import load_dotenv
+from images import AuthError, FetchError, fetch_last_watched
 
-# Load environment variables
-load_dotenv()
 
-# Trakt.tv API credentials
-CLIENT_ID = os.getenv('TRAKT_CLIENT_ID')
-ACCESS_TOKEN = os.getenv('TRAKT_ACCESS_TOKEN')
+def main():
+    load_dotenv()
+    client, token = os.getenv('TRAKT_CLIENT_ID'), os.getenv('TRAKT_ACCESS_TOKEN')
+    if not client or not token:
+        print('Set TRAKT_CLIENT_ID and TRAKT_ACCESS_TOKEN.')
+        return 1
+    try:
+        item = fetch_last_watched('episodes', {'trakt-api-version': '2',
+                                  'trakt-api-key': client, 'Authorization': f'Bearer {token}'})
+        if item:
+            print(f"Last watched show: {item['show']['title']}")
+            print(f"Episode: {item['episode'].get('title', 'Untitled')}")
+            print(f"Watched at: {item['watched_at']}")
+        else:
+            print('No episode watch history found.')
+    except AuthError as exc:
+        print(str(exc), file=sys.stderr)
+        return 10
+    except FetchError as exc:
+        print(str(exc), file=sys.stderr)
+        return 1
+    return 0
 
-# API endpoint for last watched item
-API_ENDPOINT = 'https://api.trakt.tv/users/me/history/shows'
 
-# Headers for authentication
-headers = {
-    'Content-Type': 'application/json',
-    'trakt-api-version': '2',
-    'trakt-api-key': CLIENT_ID,
-    'Authorization': f'Bearer {ACCESS_TOKEN}'
-}
-
-# Make the API request
-response = requests.get(API_ENDPOINT, headers=headers)
-
-if response.status_code == 200:
-    data = response.json()
-    if data:
-        last_watched = data[0]
-        show = last_watched['show']
-        episode = last_watched['episode']
-        
-        print(f"Last watched show: {show['title']}")
-        print(f"Episode: {episode['title']} (S{episode['season']:02d}E{episode['number']:02d})")
-        print(f"Watched at: {last_watched['watched_at']}")
-    else:
-        print("No watch history found.")
-else:
-    print(f"Error: {response.status_code}")
-    print(response.text)
+if __name__ == '__main__':
+    sys.exit(main())

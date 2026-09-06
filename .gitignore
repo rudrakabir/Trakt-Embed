@@ -2,3 +2,7 @@
 .env.bak
 access.py
 .DS_Store
+.venv/
+__pycache__/
+*.pyc
+refresh_output.txt

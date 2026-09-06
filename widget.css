@@ -1,0 +1,28 @@
+.trakt-embed { font:15px/1.5 system-ui,sans-serif; color:#202124; background:#fff; border:1px solid #dedee3; border-radius:18px; padding:24px; max-width:560px; box-sizing:border-box; }
+.trakt-embed * { box-sizing:border-box; }
+.trakt-embed header { display:flex; justify-content:space-between; align-items:center; margin-bottom:20px; gap:12px; }
+.trakt-embed h1 { font-size:20px; margin:0; letter-spacing:-.5px; }
+.trakt-embed .badge { font-size:11px; color:#a41c31; background:#fff0f2; border-radius:20px; padding:4px 9px; }
+.trakt-embed .card { display:flex; gap:16px; padding:18px 0; border-top:1px solid #e8e8ed; }
+.trakt-embed .poster { width:80px; height:120px; object-fit:cover; border-radius:8px; flex-shrink:0; }
+.trakt-embed .placeholder { display:grid; place-items:center; background:#eeeef3; color:#858592; font-size:25px; }
+.trakt-embed .details { min-width:0; overflow-wrap:anywhere; }
+.trakt-embed .label { font-size:10px; font-weight:700; text-transform:uppercase; letter-spacing:1.5px; color:#767681; }
+.trakt-embed h2 { font-size:18px; line-height:1.3; margin:5px 0; }
+.trakt-embed p { margin:4px 0; color:#656572; }
+.trakt-embed time { display:block; font-size:11px; color:#767681; margin-top:12px; }
+.trakt-embed .empty { display:block; }
+.trakt-embed footer { font-size:10px; color:#767681; border-top:1px solid #e8e8ed; padding-top:12px; }
+.trakt-embed a { color:inherit; }
+@media (prefers-color-scheme:dark) {
+  .trakt-embed { color:#f4f4f6; background:#19191e; border-color:#36363f; }
+  .trakt-embed .card,.trakt-embed footer { border-color:#36363f; }
+  .trakt-embed .placeholder { background:#2d2d36; }
+  .trakt-embed p,.trakt-embed time,.trakt-embed .label,.trakt-embed footer { color:#aaaab7; }
+  .trakt-embed .badge { background:#3c202a; color:#ff9fac; }
+}
+@media (max-width:360px) {
+  .trakt-embed { padding:16px; }
+  .trakt-embed .card { gap:12px; }
+  .trakt-embed .poster { width:60px; height:90px; }
+}
