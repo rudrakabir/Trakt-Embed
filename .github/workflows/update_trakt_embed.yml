@@ -2,7 +2,7 @@ name: Update Trakt Embed HTML
 
 on:
   schedule:
-    - cron: '0 */6 * * *'
+    - cron: '17 */6 * * *'
   workflow_dispatch:
 
 permissions:
@@ -15,96 +15,28 @@ concurrency:
 jobs:
   update_html:
     runs-on: ubuntu-latest
-    env:
-      TRAKT_CLIENT_ID: ${{ secrets.TRAKT_CLIENT_ID }}
-      TRAKT_ACCESS_TOKEN: ${{ secrets.TRAKT_ACCESS_TOKEN }}
-      TRAKT_CLIENT_SECRET: ${{ secrets.TRAKT_CLIENT_SECRET }}
-      TRAKT_REFRESH_TOKEN: ${{ secrets.TRAKT_REFRESH_TOKEN }}
-      TMDB_ACCESS_TOKEN: ${{ secrets.TMDB_ACCESS_TOKEN }}
+    timeout-minutes: 5
     steps:
-      - name: Checkout repository
-        uses: actions/checkout@v4
-
-      - name: Set up Python
-        uses: actions/setup-python@v5
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
         with:
-          python-version: '3.x'
-
+          python-version: '3.12'
       - name: Install dependencies
-        run: |
-          python -m pip install --upgrade pip
-          pip install -r requirements.txt
-
-      - name: Generate HTML with current token
-        id: initial_update
-        continue-on-error: true
-        run: |
-          set +e
-          python images.py
-          exit_code=$?
-          echo "exit_code=$exit_code" >> "$GITHUB_OUTPUT"
-          exit "$exit_code"
-
-      - name: Refresh Trakt tokens after auth failure
-        id: refresh_tokens
-        if: steps.initial_update.outputs.exit_code == '10'
-        run: |
-          python refresh_trakt_token.py > refresh_output.txt
-          new_access_token="$(grep '^NEW_ACCESS_TOKEN=' refresh_output.txt | cut -d'=' -f2-)"
-          new_refresh_token="$(grep '^NEW_REFRESH_TOKEN=' refresh_output.txt | cut -d'=' -f2-)"
-
-          if [ -z "$new_access_token" ] || [ -z "$new_refresh_token" ]; then
-            echo "::error::Token refresh did not return both new tokens."
-            cat refresh_output.txt
-            exit 1
-          fi
-
-          echo "::add-mask::$new_access_token"
-          echo "::add-mask::$new_refresh_token"
-          echo "access_token=$new_access_token" >> "$GITHUB_OUTPUT"
-          echo "refresh_token=$new_refresh_token" >> "$GITHUB_OUTPUT"
-
-      - name: Persist refreshed tokens for future runs
-        if: steps.refresh_tokens.conclusion == 'success'
+        run: pip install -r requirements.txt
+      - name: Test generator
+        run: python -m unittest discover -s tests -v
+      - name: Fetch public history and generate widget
         env:
-          GH_TOKEN: ${{ secrets.ACTIONS_SECRET_PAT }}
-          NEW_ACCESS_TOKEN: ${{ steps.refresh_tokens.outputs.access_token }}
-          NEW_REFRESH_TOKEN: ${{ steps.refresh_tokens.outputs.refresh_token }}
+          TRAKT_CLIENT_ID: ${{ secrets.TRAKT_CLIENT_ID }}
+          TRAKT_USERNAME: ${{ vars.TRAKT_USERNAME || github.repository_owner }}
+          TMDB_ACCESS_TOKEN: ${{ secrets.TMDB_ACCESS_TOKEN }}
+        run: python images.py --json-output trakt_data.json
+      - name: Publish changed history
         run: |
-          if [ -z "$GH_TOKEN" ]; then
-            echo "::error::Missing ACTIONS_SECRET_PAT. Add a PAT that can update repository secrets so refreshed Trakt tokens persist."
-            exit 1
-          fi
-
-          gh secret set TRAKT_ACCESS_TOKEN --body "$NEW_ACCESS_TOKEN" --repo $GITHUB_REPOSITORY
-          gh secret set TRAKT_REFRESH_TOKEN --body "$NEW_REFRESH_TOKEN" --repo $GITHUB_REPOSITORY
-          echo "Refreshed Trakt secrets saved for future runs."
-
-      - name: Generate HTML with refreshed token
-        id: refreshed_update
-        if: steps.refresh_tokens.conclusion == 'success'
-        env:
-          TRAKT_ACCESS_TOKEN: ${{ steps.refresh_tokens.outputs.access_token }}
-          TRAKT_REFRESH_TOKEN: ${{ steps.refresh_tokens.outputs.refresh_token }}
-        run: python images.py
-
-      - name: Fail for non-auth errors
-        if: steps.initial_update.outputs.exit_code != '0' && steps.initial_update.outputs.exit_code != '10'
-        run: |
-          echo "::error::images.py failed with exit code ${{ steps.initial_update.outputs.exit_code }}."
-          exit 1
-
-      - name: Commit and push if changed
-        if: |
-          steps.initial_update.outputs.exit_code == '0' ||
-          (steps.refresh_tokens.conclusion == 'success' && steps.refreshed_update.conclusion == 'success')
-        run: |
-          git config --global user.name 'github-actions[bot]'
-          git config --global user.email 'github-actions[bot]@users.noreply.github.com'
-          git add trakt_embed.html
-          if git diff --staged --quiet; then
-            echo "No changes to trakt_embed.html to commit."
-          else
-            git commit -m "Automated update: trakt_embed.html"
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add trakt_embed.html trakt_data.json
+          if ! git diff --staged --quiet; then
+            git commit -m "Update recent watch history"
             git push
           fi
