@@ -1,0 +1,32 @@
+name: Check public Trakt profile
+on:
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  check:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - run: pip install playwright
+      - run: python -m playwright install --with-deps chromium
+      - name: Read rendered public profile without credentials
+        run: |
+          python - <<'PY'
+          from playwright.sync_api import sync_playwright
+          with sync_playwright() as p:
+              browser = p.chromium.launch()
+              page = browser.new_page()
+              page.goto('https://app.trakt.tv/profile/rudrakabir', wait_until='domcontentloaded', timeout=60000)
+              try:
+                  page.get_by_text('Malcolm in the Middle', exact=False).first.wait_for(timeout=30000)
+              except Exception:
+                  pass
+              text = page.locator('body').inner_text()
+              print(text[:14000])
+              print('PUBLIC_HISTORY_PRESENT:', 'Malcolm in the Middle' in text)
+              browser.close()
+          PY
