@@ -1,0 +1,28 @@
+{
+  "version": 1,
+  "source": "public-profile",
+  "items": [
+    {
+      "type": "episodes",
+      "title": "Malcolm in the Middle",
+      "year": null,
+      "episode": "Reese Comes Home (3)",
+      "season": 6,
+      "number": 1,
+      "watched_at": "2026-09-07",
+      "date_precision": "day",
+      "poster": "https://image.tmdb.org/t/p/w200/uftxEWbn3OSykTy4DX4BrdVeiuv.jpg"
+    },
+    {
+      "type": "movies",
+      "title": "Coach Carter",
+      "year": null,
+      "episode": null,
+      "season": null,
+      "number": null,
+      "watched_at": "2026-08-27",
+      "date_precision": "day",
+      "poster": "https://image.tmdb.org/t/p/w200/y3HOTTyM5nLsdUzXFtFCohG28qj.jpg"
+    }
+  ]
+}

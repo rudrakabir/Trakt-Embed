@@ -1,56 +1,29 @@
-
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Last Watched on Trakt</title>
-    <style>
-        .trakt-embed {
-            font-family: Arial, sans-serif;
-            max-width: 500px;
-            border: 1px solid #ddd;
-            padding: 15px;
-            border-radius: 8px;
-            background-color: #f9f9f9;
-        }
-        .trakt-embed h3 {
-            margin-top: 0;
-            color: #2c3e50;
-        }
-        .trakt-embed .item {
-            margin-bottom: 15px;
-            padding-bottom: 15px;
-            border-bottom: 1px solid #eee;
-            display: flex;
-            align-items: start;
-        }
-        .trakt-embed .item:last-child {
-            margin-bottom: 0;
-            padding-bottom: 0;
-            border-bottom: none;
-        }
-        .trakt-embed .item-image {
-            width: 100px;
-            margin-right: 15px;
-        }
-        .trakt-embed .item-details {
-            flex-grow: 1;
-        }
-        .trakt-embed p {
-            margin: 5px 0;
-            color: #34495e;
-        }
-        .trakt-embed .timestamp {
-            font-size: 0.8em;
-            color: #7f8c8d;
-        }
-    </style>
-</head>
-<body>
-    <div class="trakt-embed">
-        <h3>Last Watched on Trakt</h3>
-
-    </div>
-</body>
-</html>
+<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Recently watched · Trakt</title></head><body><style>.trakt-embed { font:15px/1.5 system-ui,sans-serif; color:#202124; background:#fff; border:1px solid #dedee3; border-radius:18px; padding:24px; max-width:560px; box-sizing:border-box; }
+.trakt-embed * { box-sizing:border-box; }
+.trakt-embed header { display:flex; justify-content:space-between; align-items:center; margin-bottom:20px; gap:12px; }
+.trakt-embed h1 { font-size:20px; margin:0; letter-spacing:-.5px; }
+.trakt-embed .badge { font-size:11px; color:#a41c31; background:#fff0f2; border-radius:20px; padding:4px 9px; }
+.trakt-embed .card { display:flex; gap:16px; padding:18px 0; border-top:1px solid #e8e8ed; }
+.trakt-embed .poster { width:80px; height:120px; object-fit:cover; border-radius:8px; flex-shrink:0; }
+.trakt-embed .placeholder { display:grid; place-items:center; background:#eeeef3; color:#858592; font-size:25px; }
+.trakt-embed .details { min-width:0; overflow-wrap:anywhere; }
+.trakt-embed .label { font-size:10px; font-weight:700; text-transform:uppercase; letter-spacing:1.5px; color:#767681; }
+.trakt-embed h2 { font-size:18px; line-height:1.3; margin:5px 0; }
+.trakt-embed p { margin:4px 0; color:#656572; }
+.trakt-embed time { display:block; font-size:11px; color:#767681; margin-top:12px; }
+.trakt-embed .empty { display:block; }
+.trakt-embed footer { font-size:10px; color:#767681; border-top:1px solid #e8e8ed; padding-top:12px; }
+.trakt-embed a { color:inherit; }
+@media (prefers-color-scheme:dark) {
+  .trakt-embed { color:#f4f4f6; background:#19191e; border-color:#36363f; }
+  .trakt-embed .card,.trakt-embed footer { border-color:#36363f; }
+  .trakt-embed .placeholder { background:#2d2d36; }
+  .trakt-embed p,.trakt-embed time,.trakt-embed .label,.trakt-embed footer { color:#aaaab7; }
+  .trakt-embed .badge { background:#3c202a; color:#ff9fac; }
+}
+@media (max-width:360px) {
+  .trakt-embed { padding:16px; }
+  .trakt-embed .card { gap:12px; }
+  .trakt-embed .poster { width:60px; height:90px; }
+}
+</style><section class="trakt-embed" aria-label="Recent watch history"><header><h1>Recently watched</h1><span class="badge">Trakt</span></header><article class="card"><img class="poster" src="https://image.tmdb.org/t/p/w200/uftxEWbn3OSykTy4DX4BrdVeiuv.jpg" alt="" loading="lazy" width="80" height="120"><div class="details"><span class="label">Episode</span><h2>Malcolm in the Middle</h2><p>S06E01 · Reese Comes Home (3)</p><time datetime="2026-09-07">Watched 07 Sep 2026</time></div></article><article class="card"><img class="poster" src="https://image.tmdb.org/t/p/w200/y3HOTTyM5nLsdUzXFtFCohG28qj.jpg" alt="" loading="lazy" width="80" height="120"><div class="details"><span class="label">Movie</span><h2>Coach Carter</h2><p></p><time datetime="2026-08-27">Watched 27 Aug 2026</time></div></article><footer>Watch history from <a href="https://trakt.tv">Trakt</a>. Artwork from <a href="https://www.themoviedb.org">TMDB</a>.<br>This product uses the TMDB API but is not endorsed or certified by TMDB.</footer></section></body></html>
