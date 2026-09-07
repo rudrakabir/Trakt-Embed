@@ -76,7 +76,9 @@ def render_card(item, kind, poster=None):
         code = f'S{season:02d}E{number:02d}' if isinstance(season, int) and isinstance(number, int) else ''
         details = ' · '.join(p for p in [code, str(episode.get('title') or '')] if p)
     try:
-        watched = datetime.fromisoformat(item['watched_at'].replace('Z', '+00:00'))
+        day_only = item.get('date_precision') == 'day'
+        raw_date = item['watched_at'] + 'T00:00:00+00:00' if day_only else item['watched_at']
+        watched = datetime.fromisoformat(raw_date.replace('Z', '+00:00'))
         if watched.tzinfo is None:
             raise ValueError('Missing timezone')
         watched = watched.astimezone(timezone.utc)
@@ -84,9 +86,11 @@ def render_card(item, kind, poster=None):
         raise FetchError('Invalid watch date; existing output preserved.') from exc
     art = (f'<img class="poster" src="{escape(poster, quote=True)}" alt="" loading="lazy" width="80" height="120">'
            if poster else '<div class="poster placeholder" aria-hidden="true">▶</div>')
+    date_label = watched.strftime('%d %b %Y' if day_only else '%d %b %Y · %H:%M UTC')
+    date_value = item['watched_at'] if day_only else watched.isoformat()
     return (f'<article class="card">{art}<div class="details"><span class="label">{label}</span>'
             f'<h2>{escape(str(media["title"]))}</h2><p>{escape(details)}</p>'
-            f'<time datetime="{watched.isoformat()}">Watched {watched:%d %b %Y · %H:%M UTC}</time></div></article>')
+            f'<time datetime="{date_value}">Watched {date_label}</time></div></article>')
 
 
 def render_html(show, movie, posters=(None, None), fragment=False):

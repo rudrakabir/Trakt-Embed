@@ -40,10 +40,11 @@
         ? `S${String(item.season).padStart(2, '0')}E${String(item.number).padStart(2, '0')}` : '';
       subtitle = [code, typeof item.episode === 'string' ? item.episode : ''].filter(Boolean).join(' · ');
     }
-    const time = element('time', '', `Watched ${new Intl.DateTimeFormat(undefined, {
-      day: 'numeric', month: 'short', year: 'numeric', hour: '2-digit', minute: '2-digit', timeZoneName: 'short'
-    }).format(watched)}`);
-    time.dateTime = watched.toISOString();
+    const dayOnly = item.date_precision === 'day';
+    const dateOptions = dayOnly ? {day:'numeric', month:'short', year:'numeric', timeZone:'UTC'}
+      : {day:'numeric', month:'short', year:'numeric', hour:'2-digit', minute:'2-digit', timeZoneName:'short'};
+    const time = element('time', '', `Watched ${new Intl.DateTimeFormat(undefined, dateOptions).format(watched)}`);
+    time.dateTime = dayOnly ? item.watched_at : watched.toISOString();
     details.append(element('span', 'label', label), element('h2', '', item.title), element('p', '', subtitle), time);
     article.append(art, details);
     return article;
