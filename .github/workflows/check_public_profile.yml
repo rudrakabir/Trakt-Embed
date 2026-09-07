@@ -26,7 +26,12 @@ jobs:
               except Exception:
                   pass
               text = page.locator('body').inner_text()
-              print(text[:14000])
               print('PUBLIC_HISTORY_PRESENT:', 'Malcolm in the Middle' in text)
+              print(page.locator('time').evaluate_all('(nodes) => nodes.slice(0,6).map(n => n.parentElement.outerHTML)'))
+              print(page.locator('a[href*="/shows/"], a[href*="/movies/"]').evaluate_all('(nodes) => nodes.slice(0,8).map(n => n.parentElement.outerHTML)'))
+              page.goto('https://app.trakt.tv/profile/rudrakabir?mode=movie', wait_until='networkidle', timeout=60000)
+              print('MOVIE_VIEW:', page.locator('body').inner_text()[:10000])
+              print(page.locator('time').evaluate_all('(nodes) => nodes.slice(0,3).map(n => n.parentElement.outerHTML)'))
+              print(page.locator('a[href*="/movies/"]').evaluate_all('(nodes) => nodes.slice(0,4).map(n => n.parentElement.outerHTML)'))
               browser.close()
           PY
