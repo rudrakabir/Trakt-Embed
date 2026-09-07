@@ -22,15 +22,16 @@ jobs:
         with:
           python-version: '3.12'
       - name: Install dependencies
-        run: pip install -r requirements.txt
+        run: |
+          pip install -r requirements.txt playwright
+          python -m playwright install --with-deps chromium
       - name: Test generator
         run: python -m unittest discover -s tests -v
-      - name: Fetch public history and generate widget
+      - name: Read public profile and generate widget
         env:
-          TRAKT_CLIENT_ID: ${{ secrets.TRAKT_CLIENT_ID }}
           TRAKT_USERNAME: ${{ vars.TRAKT_USERNAME || github.repository_owner }}
           TMDB_ACCESS_TOKEN: ${{ secrets.TMDB_ACCESS_TOKEN }}
-        run: python images.py --json-output trakt_data.json
+        run: python public_history.py
       - name: Publish changed history
         run: |
           git config user.name 'github-actions[bot]'
