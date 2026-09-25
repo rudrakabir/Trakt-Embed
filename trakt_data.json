@@ -4,14 +4,14 @@
   "items": [
     {
       "type": "episodes",
-      "title": "Malcolm in the Middle",
+      "title": "Reacher",
       "year": null,
-      "episode": "Ida's Dance",
-      "season": 6,
-      "number": 18,
-      "watched_at": "2026-09-17",
+      "episode": "One Small Step",
+      "season": 4,
+      "number": 3,
+      "watched_at": "2026-09-25",
       "date_precision": "day",
-      "poster": "https://image.tmdb.org/t/p/w200/uftxEWbn3OSykTy4DX4BrdVeiuv.jpg"
+      "poster": "https://image.tmdb.org/t/p/w200/f1VCQIG2iCyOookdgOzwtUpwWC0.jpg"
     },
     {
       "type": "movies",
