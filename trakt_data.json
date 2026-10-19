@@ -4,14 +4,14 @@
   "items": [
     {
       "type": "episodes",
-      "title": "Reacher",
+      "title": "Lanterns",
       "year": null,
-      "episode": "Cut",
-      "season": 4,
-      "number": 8,
-      "watched_at": "2026-09-28",
+      "episode": "Pilot",
+      "season": 1,
+      "number": 1,
+      "watched_at": "2026-10-07",
       "date_precision": "day",
-      "poster": "https://image.tmdb.org/t/p/w200/f1VCQIG2iCyOookdgOzwtUpwWC0.jpg"
+      "poster": "https://image.tmdb.org/t/p/w200/rb94rKVIzLyfWufIN7WqLvadBDH.jpg"
     },
     {
       "type": "movies",
