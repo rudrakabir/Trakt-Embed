@@ -64,6 +64,17 @@ def get_tmdb_image(media, kind, token, session=requests):
     return None
 
 
+def watch_date(value, day_only=False):
+    try:
+        raw_date = value + 'T00:00:00+00:00' if day_only else value
+        watched = datetime.fromisoformat(raw_date.replace('Z', '+00:00'))
+        if watched.tzinfo is None:
+            raise ValueError('Missing timezone')
+        return watched.astimezone(timezone.utc)
+    except (ValueError, TypeError, AttributeError) as exc:
+        raise FetchError('Invalid watch date; existing output preserved.') from exc
+
+
 def render_card(item, kind, poster=None):
     label = 'Episode' if kind == 'episodes' else 'Movie'
     if item is None:
@@ -75,15 +86,8 @@ def render_card(item, kind, poster=None):
         season, number = episode.get('season'), episode.get('number')
         code = f'S{season:02d}E{number:02d}' if isinstance(season, int) and isinstance(number, int) else ''
         details = ' · '.join(p for p in [code, str(episode.get('title') or '')] if p)
-    try:
-        day_only = item.get('date_precision') == 'day'
-        raw_date = item['watched_at'] + 'T00:00:00+00:00' if day_only else item['watched_at']
-        watched = datetime.fromisoformat(raw_date.replace('Z', '+00:00'))
-        if watched.tzinfo is None:
-            raise ValueError('Missing timezone')
-        watched = watched.astimezone(timezone.utc)
-    except (ValueError, TypeError, AttributeError) as exc:
-        raise FetchError('Invalid watch date; existing output preserved.') from exc
+    day_only = item.get('date_precision') == 'day'
+    watched = watch_date(item['watched_at'], day_only)
     art = (f'<img class="poster" src="{escape(poster, quote=True)}" alt="" loading="lazy" width="80" height="120">'
            if poster else '<div class="poster placeholder" aria-hidden="true">▶</div>')
     date_label = watched.strftime('%d %b %Y' if day_only else '%d %b %Y · %H:%M UTC')
@@ -128,6 +132,7 @@ def main(argv=None):
     parser.add_argument('--fragment', action='store_true', help='Generate an HTML fragment for Jekyll')
     parser.add_argument('--username', default=os.getenv('TRAKT_USERNAME', 'me'), help='Public Trakt username; me uses OAuth')
     parser.add_argument('--json-output', help='Also publish a minimal public JSON feed')
+    parser.add_argument('--date-only', action='store_true', help='Publish UTC dates without watch times')
     args = parser.parse_args(argv)
     client, token = os.getenv('TRAKT_CLIENT_ID'), os.getenv('TRAKT_ACCESS_TOKEN')
     if not client or (args.username == 'me' and not token):
@@ -142,6 +147,11 @@ def main(argv=None):
         token = os.getenv('TMDB_ACCESS_TOKEN')
         posters = (get_tmdb_image(show['show'], 'tv', token) if show else None,
                    get_tmdb_image(movie['movie'], 'movie', token) if movie else None)
+        if args.date_only:
+            show, movie = (
+                dict(item, watched_at=watch_date(item['watched_at']).date().isoformat(), date_precision='day')
+                if item is not None else None for item in (show, movie)
+            )
         html = render_html(show, movie, posters, args.fragment)
         feed = {'version': 1, 'items': []}
         for item, kind, poster in zip((show, movie), ('episodes', 'movies'), posters):
@@ -152,6 +162,8 @@ def main(argv=None):
             feed['items'].append({'type': kind, 'title': media['title'], 'year': media.get('year'),
                                   'episode': episode.get('title'), 'season': episode.get('season'),
                                   'number': episode.get('number'), 'watched_at': item['watched_at'], 'poster': poster})
+            if args.date_only:
+                feed['items'][-1]['date_precision'] = 'day'
         serialized = json.dumps(feed, ensure_ascii=False, indent=2) + '\n'
         write_atomic(args.output, html)
         if args.json_output:
