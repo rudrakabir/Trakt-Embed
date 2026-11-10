@@ -1,28 +1,27 @@
 {
   "version": 1,
-  "source": "public-profile",
   "items": [
     {
       "type": "episodes",
       "title": "Lanterns",
-      "year": null,
+      "year": 2026,
       "episode": "Pilot",
       "season": 1,
       "number": 1,
       "watched_at": "2026-10-07",
-      "date_precision": "day",
-      "poster": "https://image.tmdb.org/t/p/w200/rb94rKVIzLyfWufIN7WqLvadBDH.jpg"
+      "poster": "https://image.tmdb.org/t/p/w200/rb94rKVIzLyfWufIN7WqLvadBDH.jpg",
+      "date_precision": "day"
     },
     {
       "type": "movies",
-      "title": "Coach Carter",
-      "year": null,
+      "title": "Caveat",
+      "year": 2021,
       "episode": null,
       "season": null,
       "number": null,
-      "watched_at": "2026-08-27",
-      "date_precision": "day",
-      "poster": "https://image.tmdb.org/t/p/w200/y3HOTTyM5nLsdUzXFtFCohG28qj.jpg"
+      "watched_at": "2026-11-05",
+      "poster": "https://image.tmdb.org/t/p/w200/nbug05AceVU8PMXIONDFxMRtq54.jpg",
+      "date_precision": "day"
     }
   ]
 }
