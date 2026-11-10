@@ -3,12 +3,18 @@ import argparse
 from datetime import datetime, timedelta, timezone
 import json
 import os
-from pathlib import Path
 import re
 import sys
 from urllib.parse import quote
 import requests
 from images import FetchError, TIMEOUT, render_html, write_atomic
+
+
+WEEKDAYS = ('monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday', 'sunday')
+WATCH_DATE = re.compile(
+    r'^(?:Today|Yesterday|Last [A-Za-z]+|[A-Za-z]+ \d{1,2}(?:st|nd|rd|th)?, \d{4})$',
+    re.IGNORECASE,
+)
 
 
 def parse_history(text, kind, today=None):
@@ -19,10 +25,14 @@ def parse_history(text, kind, today=None):
         date_text, title, detail = lines[start:start + 3]
     except (ValueError, IndexError) as exc:
         raise FetchError('Public history was not found; existing output preserved.') from exc
-    if date_text == 'Today':
+    date_label = date_text.casefold()
+    if date_label == 'today':
         watched = today
-    elif date_text == 'Yesterday':
+    elif date_label == 'yesterday':
         watched = today - timedelta(days=1)
+    elif date_label.startswith('last ') and date_label[5:] in WEEKDAYS:
+        days_ago = (today.weekday() - WEEKDAYS.index(date_label[5:])) % 7 or 7
+        watched = today - timedelta(days=days_ago)
     else:
         clean = re.sub(r'(\d+)(st|nd|rd|th)', r'\1', date_text)
         try:
@@ -72,6 +82,44 @@ def as_history(item):
             'watched_at': item['watched_at'], 'date_precision': 'day'}
 
 
+def read_history(page, username, kind, mode):
+    from playwright.sync_api import Error
+
+    status = 'unavailable'
+    stage = 'opening profile'
+    try:
+        response = page.goto(f'https://app.trakt.tv/profile/{quote(username, safe="")}?mode={mode}',
+                             wait_until='domcontentloaded', timeout=60000)
+        if response is not None:
+            status = response.status
+            if (response.headers.get('cf-mitigated') == 'challenge'
+                    or page.get_by_text('Sorry, you have been blocked', exact=True).count()):
+                raise FetchError('Cloudflare blocked the runner from reading the public profile.')
+            if status >= 400:
+                raise FetchError(f'Trakt returned HTTP {status}.')
+
+        stage = 'waiting for a public history entry'
+        link = page.get_by_role('link', name='View all history', exact=True)
+        history = page.locator('section.section-list-container').filter(has=link)
+        history.scroll_into_view_if_needed(timeout=30000)
+        history.get_by_text(WATCH_DATE).first.wait_for(timeout=30000)
+        stage = 'parsing the history entry'
+        lines = history.inner_text().splitlines()
+        start = next((i for i, line in enumerate(lines) if WATCH_DATE.fullmatch(line.strip())), None)
+        if start is None:
+            raise FetchError('No recognized date was found in the history section.')
+        return parse_history('History\n' + '\n'.join(lines[start:]), kind)
+    except (Error, FetchError) as exc:
+        try:
+            title = ' '.join(page.title().split())[:120]
+        except Error:
+            title = 'unavailable'
+        final_url = page.url.split('?', 1)[0].split('#', 1)[0]
+        detail = str(exc) if isinstance(exc, FetchError) else type(exc).__name__
+        raise FetchError(f'{mode} view, {stage}: {detail} '
+                         f'(HTTP {status}, URL {final_url}, title {title!r}).') from exc
+
+
 def main(argv=None):
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument('--username', default=os.getenv('TRAKT_USERNAME', 'rudrakabir'))
@@ -86,10 +134,7 @@ def main(argv=None):
             page = context.new_page()
             items = []
             for kind, mode in [('episodes', 'show'), ('movies', 'movie')]:
-                page.goto(f'https://app.trakt.tv/profile/{quote(args.username, safe="")}?mode={mode}',
-                          wait_until='networkidle', timeout=60000)
-                page.get_by_text('History', exact=True).wait_for(timeout=30000)
-                item = parse_history(page.locator('body').inner_text(), kind)
+                item = read_history(page, args.username, kind, mode)
                 item['poster'] = poster_for(item)
                 items.append(item)
             browser.close()
@@ -98,7 +143,8 @@ def main(argv=None):
         write_atomic(args.output, html)
         write_atomic(args.json_output, feed)
     except (FetchError, Error, OSError) as exc:
-        print(f'Public history update failed ({type(exc).__name__}); existing output preserved.', file=sys.stderr)
+        detail = str(exc) if isinstance(exc, FetchError) else type(exc).__name__
+        print(f'Public history update failed: {detail} Existing output preserved.', file=sys.stderr)
         return 1
     print('Published latest public episode and movie.')
     return 0
