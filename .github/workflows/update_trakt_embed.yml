@@ -22,17 +22,33 @@ jobs:
         with:
           python-version: '3.12'
       - name: Install dependencies
-        run: |
-          pip install -r requirements.txt playwright
-          python -m playwright install --with-deps chromium
+        run: pip install -r requirements.txt
       - name: Test generator
         run: python -m unittest discover -s tests -v
-      - name: Read public profile and generate widget
+      - name: Read public history from the Trakt API
         env:
           TRAKT_USERNAME: ${{ vars.TRAKT_USERNAME || github.repository_owner }}
+          TRAKT_CLIENT_ID: ${{ secrets.TRAKT_CLIENT_ID }}
           TMDB_ACCESS_TOKEN: ${{ secrets.TMDB_ACCESS_TOKEN }}
-        run: python public_history.py
+        run: python images.py --date-only --json-output trakt_data.json
+      - name: Verify public feed
+        run: |
+          python - <<'PY'
+          from datetime import date
+          import json
+          from pathlib import Path
+
+          items = json.loads(Path('trakt_data.json').read_text())['items']
+          if len(items) != 2 or {item['type'] for item in items} != {'episodes', 'movies'}:
+              raise SystemExit('Expected a public episode and movie. Existing feed preserved.')
+          for item in items:
+              watched = item['watched_at']
+              if item.get('date_precision') != 'day' or date.fromisoformat(watched).isoformat() != watched:
+                  raise SystemExit('Expected a watch date without a time. Existing feed preserved.')
+          print('Verified one episode and one movie with date-only watch history.')
+          PY
       - name: Publish changed history
+        if: github.ref == 'refs/heads/main'
         run: |
           git config user.name 'github-actions[bot]'
           git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
