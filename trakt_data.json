@@ -14,13 +14,13 @@
     },
     {
       "type": "movies",
-      "title": "Caveat",
-      "year": 2021,
+      "title": "Sinister 2",
+      "year": 2015,
       "episode": null,
       "season": null,
       "number": null,
-      "watched_at": "2026-11-05",
-      "poster": "https://image.tmdb.org/t/p/w200/nbug05AceVU8PMXIONDFxMRtq54.jpg",
+      "watched_at": "2026-11-20",
+      "poster": "https://image.tmdb.org/t/p/w200/hF6ORyihtAWHqKkIQI8BSpLQyON.jpg",
       "date_precision": "day"
     }
   ]
