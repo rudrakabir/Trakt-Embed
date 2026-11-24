@@ -14,13 +14,13 @@
     },
     {
       "type": "movies",
-      "title": "Sinister 2",
-      "year": 2015,
+      "title": "Rebel Ridge",
+      "year": 2024,
       "episode": null,
       "season": null,
       "number": null,
-      "watched_at": "2026-11-20",
-      "poster": "https://image.tmdb.org/t/p/w200/hF6ORyihtAWHqKkIQI8BSpLQyON.jpg",
+      "watched_at": "2026-11-23",
+      "poster": "https://image.tmdb.org/t/p/w200/xEt2GSz9z5rSVpIHMiGdtf0czyf.jpg",
       "date_precision": "day"
     }
   ]
